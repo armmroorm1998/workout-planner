@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #e3e6ea;
+  --text: #15181d;
+  --muted: #667085;
+  --accent: #16a34a;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcfce7;
+  --danger: #dc2626;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0d1014;
+    --surface: #161a20;
+    --surface-2: #1e232b;
+    --border: #2a3039;
+    --text: #e8ebef;
+    --muted: #98a2b3;
+    --accent: #22c55e;
+    --accent-ink: #052e12;
+    --accent-soft: #143322;
+    --danger: #f87171;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-thai), system-ui, sans-serif;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-surface p-4; }
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none
+      focus:border-accent focus:ring-2 focus:ring-accent/30;
+  }
+  .label { @apply mb-1 block text-sm text-muted; }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface
+      px-4 py-2 text-sm font-medium text-ink transition hover:bg-surface-2 disabled:opacity-50;
+  }
+  .btn-primary { @apply border-transparent bg-accent text-accent-ink hover:bg-accent hover:brightness-110; }
+  .btn-danger { @apply text-danger; }
+  .btn-sm { @apply px-2.5 py-1 text-xs; }
+  .chip { @apply inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted; }
 }
