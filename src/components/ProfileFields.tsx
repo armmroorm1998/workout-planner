@@ -28,9 +28,9 @@ export function ProfileFields({ value, onChange }: { value: ProfileForm; onChang
         <label className="label">เพศ</label>
         <div className="grid grid-cols-2 gap-2">
           {([["male", "ชาย"], ["female", "หญิง"]] as const).map(([v, label]) => (
-            <label key={v} className={`btn ${value.sex === v ? "btn-primary" : ""}`}>
+            <label key={v} className={`pill cursor-pointer py-2.5 text-center font-medium ${value.sex === v ? "pill-active" : ""}`}>
               <input type="radio" name="sex" className="sr-only" required value={v} checked={value.sex === v} onChange={set("sex")} />
-              {label}
+              {v === "male" ? "👨 " : "👩 "}{label}
             </label>
           ))}
         </div>

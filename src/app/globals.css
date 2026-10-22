@@ -1,66 +1,296 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-2: #f0f2f5;
-  --border: #e3e6ea;
-  --text: #15181d;
-  --muted: #667085;
-  --accent: #16a34a;
-  --accent-ink: #ffffff;
-  --accent-soft: #dcfce7;
-  --danger: #dc2626;
+  --bg: #f4f6fb;
+  --surface: rgb(255 255 255 / 0.72);
+  --surface-solid: #ffffff;
+  --surface-2: rgb(15 23 42 / 0.045);
+  --border: rgb(15 23 42 / 0.08);
+  --text: #0b1220;
+  --muted: #5b6577;
+  --accent: #059669;
+  --accent-2: #65a30d;
+  --accent-ink: #03200f;
+  --accent-soft: rgb(16 185 129 / 0.12);
+  --danger: #e11d48;
+  --glow: rgb(16 185 129 / 0.35);
+  --blob-1: rgb(16 185 129 / 0.22);
+  --blob-2: rgb(99 102 241 / 0.16);
+  --blob-3: rgb(132 204 22 / 0.18);
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.10);
+  --shadow-lg: 0 2px 4px rgb(15 23 42 / 0.04), 0 24px 48px -12px rgb(15 23 42 / 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0d1014;
-    --surface: #161a20;
-    --surface-2: #1e232b;
-    --border: #2a3039;
-    --text: #e8ebef;
-    --muted: #98a2b3;
-    --accent: #22c55e;
-    --accent-ink: #052e12;
-    --accent-soft: #143322;
-    --danger: #f87171;
+    --bg: #070a0f;
+    --surface: rgb(22 27 36 / 0.66);
+    --surface-solid: #11161e;
+    --surface-2: rgb(255 255 255 / 0.05);
+    --border: rgb(255 255 255 / 0.08);
+    --text: #eef2f7;
+    --muted: #8b95a7;
+    --accent: #34d399;
+    --accent-2: #a3e635;
+    --accent-ink: #03200f;
+    --accent-soft: rgb(52 211 153 / 0.14);
+    --danger: #fb7185;
+    --glow: rgb(52 211 153 / 0.4);
+    --blob-1: rgb(16 185 129 / 0.20);
+    --blob-2: rgb(99 102 241 / 0.18);
+    --blob-3: rgb(132 204 22 / 0.10);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 24px 48px -12px rgb(0 0 0 / 0.7);
   }
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-surface-solid: var(--surface-solid);
   --color-surface-2: var(--surface-2);
   --color-line: var(--border);
   --color-ink: var(--text);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-danger: var(--danger);
   --font-sans: var(--font-thai), system-ui, sans-serif;
+  --ease-spring: cubic-bezier(0.2, 0.9, 0.25, 1.15);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  min-height: 100dvh;
+}
+
+/* Slowly drifting colour blobs behind everything */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 35% at 15% 10%, var(--blob-1), transparent 70%),
+    radial-gradient(35% 30% at 90% 20%, var(--blob-2), transparent 70%),
+    radial-gradient(45% 40% at 60% 100%, var(--blob-3), transparent 70%);
+  filter: blur(20px);
+  animation: drift 28s ease-in-out infinite alternate;
+}
+
+::selection {
+  background: var(--accent-soft);
 }
 
 @layer components {
-  .card { @apply rounded-2xl border border-line bg-surface p-4; }
+  .card {
+    @apply rounded-3xl border border-line bg-surface p-5 backdrop-blur-xl;
+    box-shadow: var(--shadow);
+  }
+  .card-hover {
+    @apply transition duration-300 ease-out-expo hover:-translate-y-1 hover:border-accent/40 active:scale-[0.99];
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--accent-soft);
+  }
+
   .input {
-    @apply w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none
-      focus:border-accent focus:ring-2 focus:ring-accent/30;
+    @apply w-full rounded-2xl border border-line bg-surface-2 px-4 py-2.5 text-ink outline-none
+      transition duration-200 placeholder:text-muted/60
+      focus:border-accent focus:bg-surface-solid focus:ring-4 focus:ring-accent/15;
   }
-  .label { @apply mb-1 block text-sm text-muted; }
+  .label { @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted; }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface
-      px-4 py-2 text-sm font-medium text-ink transition hover:bg-surface-2 disabled:opacity-50;
+    @apply relative inline-flex cursor-pointer select-none items-center justify-center gap-1.5 overflow-hidden
+      rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-ink backdrop-blur
+      transition duration-200 ease-out-expo hover:-translate-y-px hover:bg-surface-solid active:translate-y-0 active:scale-[0.96]
+      disabled:pointer-events-none disabled:opacity-60;
   }
-  .btn-primary { @apply border-transparent bg-accent text-accent-ink hover:bg-accent hover:brightness-110; }
-  .btn-danger { @apply text-danger; }
-  .btn-sm { @apply px-2.5 py-1 text-xs; }
-  .chip { @apply inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted; }
+  .btn-primary {
+    @apply border-transparent text-accent-ink;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 20px -6px var(--glow), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 10px 28px -6px var(--glow), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  }
+  /* Light sweep across primary buttons on hover */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s var(--ease-out-expo);
+  }
+  .btn-primary:hover::after { transform: translateX(120%); }
+  .btn-danger { @apply text-danger hover:border-danger/30; }
+  .btn-ghost { @apply border-transparent bg-transparent backdrop-blur-none hover:bg-surface-2; }
+  .btn-sm { @apply rounded-xl px-3 py-1.5 text-xs; }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface-2 px-2.5 py-0.5 text-[11px] font-medium text-muted;
+  }
+  .chip-accent { @apply border-accent/25 bg-accent-soft text-accent; }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Segmented control / day pills */
+  .pill {
+    @apply relative rounded-2xl border border-line bg-surface py-2 text-sm backdrop-blur transition duration-300 ease-out-expo
+      hover:-translate-y-0.5 active:scale-95;
+  }
+  .pill-active {
+    @apply border-transparent font-semibold text-accent-ink;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 18px -6px var(--glow);
+  }
+
+  /* Animated checkbox */
+  .check {
+    @apply relative grid h-7 w-7 shrink-0 cursor-pointer appearance-none place-content-center rounded-xl border-2 border-line
+      bg-surface-solid transition duration-300 ease-spring active:scale-90;
+  }
+  .check::after {
+    content: "";
+    width: 0.55rem;
+    height: 0.95rem;
+    margin-top: -0.15rem;
+    border: solid var(--accent-ink);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.35s var(--ease-spring);
+  }
+  .check:checked {
+    @apply border-transparent;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 0 4px var(--accent-soft), 0 4px 14px -4px var(--glow);
+    animation: pop 0.4s var(--ease-spring);
+  }
+  .check:checked::after { transform: rotate(45deg) scale(1); }
+
+  /* Progress bar with moving sheen */
+  .progress { @apply h-2.5 overflow-hidden rounded-full bg-surface-2; }
+  .progress > div {
+    @apply relative h-full rounded-full transition-[width] duration-700 ease-out-expo;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 12px var(--glow);
+  }
+  .progress > div::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
+    animation: sheen 2s ease-in-out infinite;
+  }
+
+  /* Loading */
+  .skeleton {
+    @apply rounded-xl bg-surface-2;
+    background-image: linear-gradient(90deg, transparent, var(--surface-2), rgb(255 255 255 / 0.12), var(--surface-2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  .spinner {
+    @apply inline-block h-4 w-4 shrink-0 rounded-full border-2 border-current border-r-transparent;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* Entrances */
+  .page-enter { animation: page-in 0.55s var(--ease-out-expo) both; }
+  .fade-up { animation: fade-up 0.5s var(--ease-out-expo) both; }
+  .stagger > * { animation: fade-up 0.5s var(--ease-out-expo) both; }
+  .stagger > :nth-child(2) { animation-delay: 50ms; }
+  .stagger > :nth-child(3) { animation-delay: 100ms; }
+  .stagger > :nth-child(4) { animation-delay: 150ms; }
+  .stagger > :nth-child(5) { animation-delay: 200ms; }
+  .stagger > :nth-child(6) { animation-delay: 250ms; }
+  .stagger > :nth-child(7) { animation-delay: 300ms; }
+  .stagger > :nth-child(n + 8) { animation-delay: 350ms; }
+  .scale-in { animation: scale-in 0.35s var(--ease-spring) both; }
+  .sheet-in { animation: sheet-in 0.45s var(--ease-out-expo) both; }
+  .backdrop-in { animation: fade 0.3s ease-out both; }
+  .toast { animation: toast-in 0.45s var(--ease-spring) both; }
+
+  /* Logo: heartbeat line draws itself in, and again on hover */
+  .logo-pulse {
+    stroke-dasharray: 42;
+    stroke-dashoffset: 0;
+    animation: pulse-draw 1.2s var(--ease-out-expo) 0.2s both;
+  }
+  .group:hover .logo-pulse { animation: pulse-draw 0.9s var(--ease-out-expo) both; }
+  .logo-float {
+    filter: drop-shadow(0 18px 30px var(--glow));
+    animation: float 5s ease-in-out infinite;
+  }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); filter: blur(6px); }
+  /* filter must end as none: any filter value would trap position:fixed children (modals) */
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes sheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-draw { from { stroke-dashoffset: 42; } to { stroke-dashoffset: 0; } }
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-3deg); }
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(-4%, 3%, 0) rotate(6deg); }
+}
+@keyframes indeterminate {
+  0% { transform: translateX(-100%) scaleX(0.3); }
+  50% { transform: translateX(0%) scaleX(0.6); }
+  100% { transform: translateX(100%) scaleX(0.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

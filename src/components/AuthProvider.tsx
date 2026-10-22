@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getProfile } from "@/lib/db";
+import { track } from "@/lib/loading";
 import type { UserProfile } from "@/lib/types";
 
 interface AuthState {
@@ -18,7 +19,7 @@ interface AuthState {
 // Asking Firebase for a fresh ID token verifies it server-side; offline we trust the cached one.
 async function tokenStillValid(u: User): Promise<boolean> {
   try {
-    await u.getIdToken(true);
+    await track(u.getIdToken(true));
     return true;
   } catch (e) {
     return (e as { code?: string }).code === "auth/network-request-failed";

@@ -1,7 +1,14 @@
 // บัญชีผูกกับรหัสเข้าสู่ระบบที่สุ่มให้ตอนสมัคร (ไม่มี username/password)
 // Firebase Auth ต้องใช้อีเมล จึงใช้ 8 ตัวแรกของรหัสเป็นอีเมลภายใน และทั้งรหัสเป็นรหัสผ่าน
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword as _createUser,
+  signInWithEmailAndPassword as _signIn,
+} from "firebase/auth";
 import { auth } from "./firebase";
+import { tracked } from "./loading";
+
+const createUserWithEmailAndPassword = tracked(_createUser);
+const signInWithEmailAndPassword = tracked(_signIn);
 
 const DOMAIN = "devices.workout-planner.local";
 const ALPHABET = "ABCDEFGHJKMNPQRSTVWXYZ23456789"; // ไม่มี I, L, O, U, 0, 1 ที่สับสนง่าย

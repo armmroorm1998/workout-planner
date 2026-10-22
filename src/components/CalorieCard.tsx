@@ -18,18 +18,19 @@ export function CalorieCard({ form }: { form: ProfileForm }) {
   ];
 
   return (
-    <div className="space-y-2 rounded-xl bg-surface-2 px-3 py-3 text-sm">
-      <div className="flex justify-between gap-2">
-        <span>
-          🔥 TDEE <b>{kcal(t)}</b> kcal/วัน
+    <div className="scale-in space-y-3 rounded-2xl bg-surface-2 p-4 text-sm">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="flex items-baseline gap-1.5">
+          🔥 <span className="text-muted">TDEE</span> <b className="text-gradient text-2xl font-extrabold tabular-nums">{kcal(t)}</b>
+          <span className="text-xs text-muted">kcal/วัน</span>
         </span>
         <span className="text-muted">BMR {kcal(b)}</span>
       </div>
-      <div className="grid grid-cols-3 gap-2 text-center">
+      <div className="stagger grid grid-cols-3 gap-2 text-center">
         {targets.map((x) => (
-          <div key={x.label} className="rounded-lg bg-surface px-2 py-2">
+          <div key={x.label} className="rounded-xl border border-line bg-surface-solid px-2 py-2.5 transition duration-300 hover:-translate-y-0.5">
             <div className="text-xs text-muted">{x.label}</div>
-            <div className="font-semibold">{kcal(x.value)}</div>
+            <div className="text-base font-bold tabular-nums">{kcal(x.value)}</div>
             <div className="text-[11px] text-muted">{x.note}</div>
           </div>
         ))}

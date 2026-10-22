@@ -9,6 +9,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { LoginTokenCard } from "@/components/LoginTokenCard";
 import { ProfileFields, emptyProfileForm, formToProfile, profileToForm } from "@/components/ProfileFields";
 import { CalorieCard } from "@/components/CalorieCard";
+import { BtnLabel } from "@/components/Loading";
 
 function bmiLabel(bmi: number) {
   if (bmi < 18.5) return "น้ำหนักน้อย";
@@ -17,6 +18,9 @@ function bmiLabel(bmi: number) {
   if (bmi < 30) return "อ้วนระดับ 1";
   return "อ้วนระดับ 2";
 }
+
+// First letter for the avatar, skipping Thai leading vowels (เ แ โ ใ ไ) so "เอก" shows "อ".
+const initial = (name: string) => name.trim().replace(/^[เแโใไ]/, "").charAt(0).toUpperCase() || "👤";
 
 function ProfileEditor() {
   const { user, profile, refreshProfile, logout } = useAuth();
@@ -53,26 +57,37 @@ function ProfileEditor() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <h1 className="mb-1 text-2xl font-bold">{setup ? "ข้อมูลของคุณ" : "โปรไฟล์"}</h1>
-      <p className="mb-4 text-muted">{setup ? "กรอกข้อมูลอีกนิดก่อนเริ่มใช้งาน" : profile?.name}</p>
+    <div className="stagger mx-auto max-w-md space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="grid h-16 w-16 shrink-0 place-content-center rounded-3xl text-2xl font-extrabold text-accent-ink"
+          style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 30px -10px var(--glow)" }}>
+          {initial(form.name || profile?.name || "")}
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight">{setup ? "ข้อมูลของคุณ" : "โปรไฟล์"}</h1>
+          <p className="truncate text-muted">{setup ? "กรอกข้อมูลอีกนิดก่อนเริ่มใช้งาน" : profile?.name}</p>
+        </div>
+      </div>
       {user && <LoginTokenCard uid={user.uid} highlight={setup} />}
-      <form onSubmit={submit} className="card space-y-3">
+      <form onSubmit={submit} className="card space-y-4">
         <ProfileFields value={form} onChange={setForm} />
         {bmi > 0 && (
-          <div className="rounded-xl bg-surface-2 px-3 py-2 text-sm">
-            BMI <b>{bmi.toFixed(1)}</b> <span className="text-muted">· {bmiLabel(bmi)}</span>
+          <div className="scale-in flex items-center justify-between rounded-2xl bg-surface-2 px-4 py-3 text-sm">
+            <span className="text-muted">BMI</span>
+            <span>
+              <b className="text-lg tabular-nums">{bmi.toFixed(1)}</b> <span className="text-muted">· {bmiLabel(bmi)}</span>
+            </span>
           </div>
         )}
         <CalorieCard form={form} />
-        {msg && <p className="text-sm text-muted">{msg}</p>}
-        <button className="btn btn-primary w-full" disabled={busy}>
-          {busy ? "กำลังบันทึก…" : setup ? "เริ่มใช้งาน" : "บันทึก"}
+        {msg && <p key={msg} className="toast rounded-2xl bg-accent-soft px-3 py-2 text-sm font-medium">{msg}</p>}
+        <button className="btn btn-primary w-full py-3" disabled={busy}>
+          <BtnLabel loading={busy} text={setup ? "เริ่มใช้งาน →" : "บันทึก"} loadingText="กำลังบันทึก…" />
         </button>
       </form>
       {!setup && (
         <button
-          className="btn btn-danger mt-4 w-full"
+          className="btn btn-danger w-full"
           onClick={() => {
             if (confirm("ออกจากระบบ? ถ้ายังไม่ได้เก็บรหัสเข้าสู่ระบบไว้ จะกลับมาใช้บัญชีนี้ไม่ได้อีก"))
               logout().then(() => router.replace("/login"));

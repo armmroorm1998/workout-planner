@@ -10,6 +10,8 @@ export interface ExerciseItem {
   reps?: string; // "8-10", "12", "15"
   duration?: string; // "20 นาที"
   note?: string;
+  videoUrl?: string; // TikTok / YouTube / Instagram demo
+  videoCredit?: string; // creator shown with the video, e.g. "@coach_name"
 }
 
 export interface ProgramDay {

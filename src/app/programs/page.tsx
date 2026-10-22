@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
-import { RequireAuth, Spinner } from "@/components/RequireAuth";
+import { RequireAuth } from "@/components/RequireAuth";
+import { ListSkeleton } from "@/components/Loading";
 import { ProgramCard } from "@/components/ProgramCard";
 import { listMyPrograms } from "@/lib/db";
 import type { Program } from "@/lib/types";
@@ -17,26 +18,23 @@ function MyPrograms() {
   }, [user]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">โปรแกรมของฉัน</h1>
-        <Link href="/programs/new" className="btn btn-primary">+ สร้าง</Link>
+    <div className="space-y-5">
+      <div className="fade-up flex items-end justify-between gap-2">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">โปรแกรมของฉัน</h1>
+          {list && <p className="text-sm text-muted">{list.length} โปรแกรม</p>}
+        </div>
+        <Link href="/programs/new" className="btn btn-primary">+ สร้างใหม่</Link>
       </div>
-      {!list ? <Spinner /> : list.length === 0 ? (
-        <div className="card text-center text-muted">
-          ยังไม่มีโปรแกรม —{" "}
-          <Link href="/programs/new?template=sample" className="text-accent underline">เริ่มจากตัวอย่าง</Link>
+      {!list ? <ListSkeleton /> : list.length === 0 ? (
+        <div className="card fade-up space-y-4 py-10 text-center">
+          <div className="text-5xl">🗂️</div>
+          <p className="text-muted">ยังไม่มีโปรแกรม</p>
+          <Link href="/programs/new?template=sample" className="btn btn-primary">✨ เริ่มจากตัวอย่าง</Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {list.map((p) => (
-            <div key={p.id} className="relative">
-              <ProgramCard p={p} />
-              {profile?.activeProgramId === p.id && (
-                <span className="chip absolute bottom-4 right-4 bg-accent-soft text-accent">⭐ โปรแกรมหลัก</span>
-              )}
-            </div>
-          ))}
+        <div className="stagger grid gap-3 sm:grid-cols-2">
+          {list.map((p) => <ProgramCard key={p.id} p={p} active={profile?.activeProgramId === p.id} />)}
         </div>
       )}
     </div>

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { RequireAuth, Spinner } from "@/components/RequireAuth";
+import { RequireAuth } from "@/components/RequireAuth";
+import { Skeleton } from "@/components/Loading";
 import { ProgramEditor, type EditorValue } from "@/components/ProgramEditor";
 import { getProgram, updateProgram } from "@/lib/db";
 import { errorMessage } from "@/lib/authErrors";
@@ -21,9 +22,17 @@ function EditProgram() {
     getProgram(id).then(setProgram).catch(() => setProgram(null));
   }, [id]);
 
-  if (program === undefined) return <Spinner />;
+  if (program === undefined)
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-9 w-1/2" />
+        <Skeleton className="h-56 rounded-3xl" />
+        <Skeleton className="h-16 rounded-2xl" />
+        <Skeleton className="h-64 rounded-3xl" />
+      </div>
+    );
   if (!program || program.ownerId !== user?.uid)
-    return <p className="card text-center text-muted">ไม่พบโปรแกรม หรือคุณไม่ใช่เจ้าของ</p>;
+    return <p className="card fade-up py-10 text-center text-muted">ไม่พบโปรแกรม หรือคุณไม่ใช่เจ้าของ</p>;
 
   async function save(v: EditorValue) {
     setSaving(true);
@@ -38,9 +47,9 @@ function EditProgram() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">แก้ไขโปรแกรม</h1>
-      {error && <p className="text-sm text-danger">{error}</p>}
+    <div className="space-y-5">
+      <h1 className="fade-up text-3xl font-extrabold tracking-tight">แก้ไข<span className="text-gradient">โปรแกรม</span></h1>
+      {error && <p className="toast rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
       <ProgramEditor
         initial={{ title: program.title, description: program.description, visibility: program.visibility, days: program.days }}
         onSave={save} saving={saving} submitLabel="บันทึกการแก้ไข" />

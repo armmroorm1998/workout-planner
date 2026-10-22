@@ -3,14 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
-
-export function Spinner() {
-  return (
-    <div className="flex justify-center py-16">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent" />
-    </div>
-  );
-}
+import { Spinner } from "./Loading";
 
 /** Redirects to /login when signed out, and to /profile when the profile isn't filled in yet. */
 export function RequireAuth({ children }: { children: React.ReactNode }) {

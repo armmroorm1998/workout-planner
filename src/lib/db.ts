@@ -1,9 +1,19 @@
 import {
-  collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
-  query, where, limit, serverTimestamp, Timestamp, type DocumentData,
+  collection, doc, query, where, limit, serverTimestamp, Timestamp, type DocumentData,
+  getDoc as _getDoc, getDocs as _getDocs, setDoc as _setDoc, updateDoc as _updateDoc,
+  deleteDoc as _deleteDoc, addDoc as _addDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { tracked } from "./loading";
 import type { Program, UserProfile, WeekLog, LogEntry } from "./types";
+
+// Every Firestore round-trip shows in the global progress bar.
+const getDoc = tracked(_getDoc);
+const getDocs = tracked(_getDocs);
+const setDoc = tracked(_setDoc);
+const updateDoc = tracked(_updateDoc);
+const deleteDoc = tracked(_deleteDoc);
+const addDoc = tracked(_addDoc);
 
 const toMillis = (v: unknown) => (v instanceof Timestamp ? v.toMillis() : undefined);
 

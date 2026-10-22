@@ -39,14 +39,14 @@ function NewProgram() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">สร้างโปรแกรม</h1>
+    <div className="space-y-5">
+      <h1 className="fade-up text-3xl font-extrabold tracking-tight">สร้าง<span className="text-gradient">โปรแกรม</span></h1>
       {sample && (
-        <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm">
+        <p className="toast rounded-2xl border border-accent/20 bg-accent-soft px-4 py-2.5 text-sm">✨ 
           เติมตัวอย่างไว้ให้แล้ว แก้ไขได้ตามใจ หรือกด “นำเข้าจากโน้ต” เพื่อวางโน้ตของคุณเอง
         </p>
       )}
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="toast rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
       <ProgramEditor initial={initial} onSave={save} saving={saving} submitLabel="สร้างโปรแกรม" />
     </div>
   );
