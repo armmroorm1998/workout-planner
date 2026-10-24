@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { DAY_SHORT, type Program } from "@/lib/types";
+import { LikeButton, ShareButton } from "./ProgramActions";
 
-export function ProgramCard({ p, showOwner, active }: { p: Program; showOwner?: boolean; active?: boolean }) {
+export function ProgramCard({ p, showOwner, active, liked }: {
+  p: Program; showOwner?: boolean; active?: boolean; liked?: boolean;
+}) {
   const workouts = p.days.filter((d) => d.items.some((i) => i.kind === "strength")).length;
   return (
-    <Link href={`/programs/${p.id}`} className="card card-hover group block">
+    <div className="card card-hover group relative">
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-lg font-bold leading-snug transition-colors group-hover:text-accent">{p.title || "ไม่มีชื่อ"}</h3>
+        {/* The ::after stretches the link over the whole card; action buttons sit above it with z-10. */}
+        <Link href={`/programs/${p.id}`}
+          className="text-lg font-bold leading-snug transition-colors after:absolute after:inset-0 after:rounded-3xl group-hover:text-accent">
+          {p.title || "ไม่มีชื่อ"}
+        </Link>
         <span className="chip shrink-0">{p.visibility === "public" ? "🌏 สาธารณะ" : "🔒 ส่วนตัว"}</span>
       </div>
       {showOwner && <div className="mt-0.5 text-sm text-muted">โดย {p.ownerName || "ไม่ระบุ"}</div>}
@@ -30,12 +37,12 @@ export function ProgramCard({ p, showOwner, active }: { p: Program; showOwner?: 
       </div>
       <div className="mt-3 flex items-center justify-between text-xs text-muted">
         <span>🏋️ เวท {workouts} วัน/สัปดาห์</span>
-        {active ? (
-          <span className="chip chip-accent">⭐ โปรแกรมหลัก</span>
-        ) : (
-          <span className="-translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100">ดูรายละเอียด →</span>
-        )}
+        {active && <span className="chip chip-accent">⭐ โปรแกรมหลัก</span>}
       </div>
-    </Link>
+      <div className="relative z-10 mt-3 flex items-center gap-2">
+        <LikeButton programId={p.id} liked={!!liked} count={p.likeCount ?? 0} />
+        {p.visibility === "public" && <ShareButton programId={p.id} />}
+      </div>
+    </div>
   );
 }

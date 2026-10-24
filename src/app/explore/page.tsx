@@ -4,11 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { ProgramCard } from "@/components/ProgramCard";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ListSkeleton } from "@/components/Loading";
-import { listPublicPrograms } from "@/lib/db";
+import { useAuth } from "@/components/AuthProvider";
+import { listLikedIds, listPublicPrograms } from "@/lib/db";
 import { errorMessage } from "@/lib/authErrors";
 import type { Program } from "@/lib/types";
 
 function Explore() {
+  const { user } = useAuth();
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [list, setList] = useState<Program[] | null>(null);
   const [error, setError] = useState("");
   const [q, setQ] = useState("");
@@ -16,6 +19,10 @@ function Explore() {
   useEffect(() => {
     listPublicPrograms().then(setList).catch((e) => setError(errorMessage(e)));
   }, []);
+
+  useEffect(() => {
+    if (user) listLikedIds(user.uid).then(setLiked).catch(() => {});
+  }, [user]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -28,7 +35,7 @@ function Explore() {
   return (
     <div className="space-y-5">
       <div className="fade-up">
-        <h1 className="text-3xl font-extrabold tracking-tight">สำรวจ<span className="text-gradient">โปรแกรม</span></h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">ค้นหา<span className="text-gradient">โปรแกรม</span></h1>
         <p className="text-muted">โปรแกรมที่คนอื่นแชร์เป็นสาธารณะ — กดเข้าไปแล้ว “คัดลอกไปใช้” ได้เลย</p>
       </div>
       <div className="fade-up relative">
@@ -43,7 +50,7 @@ function Explore() {
         </div>
       ) : (
         <div className="stagger grid gap-3 sm:grid-cols-2">
-          {filtered?.map((p) => <ProgramCard key={p.id} p={p} showOwner />)}
+          {filtered?.map((p) => <ProgramCard key={p.id} p={p} showOwner liked={liked.has(p.id)} />)}
         </div>
       )}
     </div>

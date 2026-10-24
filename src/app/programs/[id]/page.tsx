@@ -9,7 +9,8 @@ import { BtnLabel, Skeleton } from "@/components/Loading";
 import { WeekTracker } from "@/components/WeekTracker";
 import { ItemMeta } from "@/components/ItemMeta";
 import { VideoButton } from "@/components/VideoButton";
-import { copyProgram, deleteProgram, getProgram, saveProfile, updateProgram } from "@/lib/db";
+import { LikeButton } from "@/components/ProgramActions";
+import { copyProgram, deleteProgram, getProgram, isLiked, saveProfile, updateProgram } from "@/lib/db";
 import { errorMessage } from "@/lib/authErrors";
 import { DAY_NAMES, type Program } from "@/lib/types";
 
@@ -55,10 +56,15 @@ function ProgramView() {
   const [tab, setTab] = useState<"track" | "overview">("track");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     getProgram(id).then(setProgram).catch(() => setProgram(null));
   }, [id]);
+
+  useEffect(() => {
+    if (user) isLiked(user.uid, id).then(setLiked).catch(() => {});
+  }, [user, id]);
 
   if (program === undefined)
     return (
@@ -126,6 +132,7 @@ function ProgramView() {
       </div>
 
       <div className="stagger flex flex-wrap gap-2">
+        <LikeButton programId={program.id} liked={liked} count={program.likeCount ?? 0} small={isOwner} />
         {isOwner ? (
           <>
             {!isActive && (

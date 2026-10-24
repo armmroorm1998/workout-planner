@@ -8,7 +8,7 @@ import { Logo } from "./Logo";
 const LINKS = [
   { href: "/", label: "วันนี้", icon: "🔥" },
   { href: "/programs", label: "โปรแกรม", icon: "📋" },
-  { href: "/explore", label: "สำรวจ", icon: "🌏" },
+  { href: "/explore", label: "ค้นหา", icon: "🌏" },
   { href: "/profile", label: "โปรไฟล์", icon: "👤" },
 ];
 

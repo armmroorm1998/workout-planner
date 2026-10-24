@@ -6,15 +6,18 @@ import { useAuth } from "@/components/AuthProvider";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ListSkeleton } from "@/components/Loading";
 import { ProgramCard } from "@/components/ProgramCard";
-import { listMyPrograms } from "@/lib/db";
+import { listLikedIds, listMyPrograms } from "@/lib/db";
 import type { Program } from "@/lib/types";
 
 function MyPrograms() {
   const { user, profile } = useAuth();
   const [list, setList] = useState<Program[] | null>(null);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (user) listMyPrograms(user.uid).then(setList);
+    if (!user) return;
+    listMyPrograms(user.uid).then(setList);
+    listLikedIds(user.uid).then(setLiked).catch(() => {});
   }, [user]);
 
   return (
@@ -34,7 +37,7 @@ function MyPrograms() {
         </div>
       ) : (
         <div className="stagger grid gap-3 sm:grid-cols-2">
-          {list.map((p) => <ProgramCard key={p.id} p={p} active={profile?.activeProgramId === p.id} />)}
+          {list.map((p) => <ProgramCard key={p.id} p={p} active={profile?.activeProgramId === p.id} liked={liked.has(p.id)} />)}
         </div>
       )}
     </div>

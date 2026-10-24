@@ -1,10 +1,10 @@
 import {
-  collection, doc, query, where, limit, serverTimestamp, Timestamp, type DocumentData,
+  collection, doc, query, where, limit, serverTimestamp, increment, writeBatch, Timestamp, type DocumentData,
   getDoc as _getDoc, getDocs as _getDocs, setDoc as _setDoc, updateDoc as _updateDoc,
   deleteDoc as _deleteDoc, addDoc as _addDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { tracked } from "./loading";
+import { track, tracked } from "./loading";
 import type { Program, UserProfile, WeekLog, LogEntry } from "./types";
 
 // Every Firestore round-trip shows in the global progress bar.
@@ -27,6 +27,7 @@ function toProgram(id: string, d: DocumentData): Program {
     visibility: d.visibility ?? "private",
     days: d.days ?? [],
     copiedFrom: d.copiedFrom ?? null,
+    likeCount: d.likeCount ?? 0,
     createdAt: toMillis(d.createdAt),
     updatedAt: toMillis(d.updatedAt),
   };
@@ -64,7 +65,7 @@ export async function listPublicPrograms(): Promise<Program[]> {
   return snap.docs.map((d) => toProgram(d.id, d.data())).sort(byUpdatedDesc);
 }
 
-type ProgramInput = Omit<Program, "id" | "createdAt" | "updatedAt">;
+type ProgramInput = Omit<Program, "id" | "likeCount" | "createdAt" | "updatedAt">;
 
 export async function createProgram(p: ProgramInput): Promise<string> {
   const ref = await addDoc(collection(db(), "programs"), {
@@ -95,6 +96,28 @@ export async function copyProgram(src: Program, uid: string, ownerName: string):
     days: src.days,
     copiedFrom: src.id,
   });
+}
+
+// ---------- Likes ----------
+// A like is users/{uid}/likes/{programId}; programs.likeCount is kept in step in the same batch.
+
+const likeRef = (uid: string, programId: string) => doc(db(), "users", uid, "likes", programId);
+
+export async function listLikedIds(uid: string): Promise<Set<string>> {
+  const snap = await getDocs(collection(db(), "users", uid, "likes"));
+  return new Set(snap.docs.map((d) => d.id));
+}
+
+export async function isLiked(uid: string, programId: string): Promise<boolean> {
+  return (await getDoc(likeRef(uid, programId))).exists();
+}
+
+export async function setLiked(uid: string, programId: string, liked: boolean) {
+  const batch = writeBatch(db());
+  if (liked) batch.set(likeRef(uid, programId), { createdAt: serverTimestamp() });
+  else batch.delete(likeRef(uid, programId));
+  batch.update(doc(db(), "programs", programId), { likeCount: increment(liked ? 1 : -1) });
+  await track(batch.commit());
 }
 
 // ---------- Weekly check-off logs ----------

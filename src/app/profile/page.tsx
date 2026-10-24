@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { saveProfile } from "@/lib/db";
 import { errorMessage } from "@/lib/authErrors";
 import { useAuth } from "@/components/AuthProvider";
@@ -25,7 +25,8 @@ const initial = (name: string) => name.trim().replace(/^[เแโใไ]/, "").
 function ProfileEditor() {
   const { user, profile, refreshProfile, logout } = useAuth();
   const router = useRouter();
-  const setup = useSearchParams().get("setup") === "1" || !profile;
+  // Setup mode follows the actual profile, not ?setup=1, which lingers in the URL after the first save.
+  const setup = !profile;
   const [form, setForm] = useState(emptyProfileForm);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,10 +45,9 @@ function ProfileEditor() {
     setBusy(true);
     setMsg("");
     try {
-      const wasSetup = !profile;
       await saveProfile(user.uid, formToProfile(form));
       await refreshProfile();
-      if (wasSetup) router.replace("/programs/new?template=sample");
+      if (setup) router.replace("/programs/new?template=sample");
       else setMsg("บันทึกแล้ว ✓");
     } catch (err) {
       setMsg(errorMessage(err));
@@ -82,7 +82,7 @@ function ProfileEditor() {
         <CalorieCard form={form} />
         {msg && <p key={msg} className="toast rounded-2xl bg-accent-soft px-3 py-2 text-sm font-medium">{msg}</p>}
         <button className="btn btn-primary w-full py-3" disabled={busy}>
-          <BtnLabel loading={busy} text={setup ? "เริ่มใช้งาน →" : "บันทึก"} loadingText="กำลังบันทึก…" />
+          <BtnLabel loading={busy} text={setup ? "บันทึกและเริ่มใช้งาน →" : "บันทึก"} loadingText="กำลังบันทึก…" />
         </button>
       </form>
       {!setup && (
@@ -103,9 +103,7 @@ function ProfileEditor() {
 export default function ProfilePage() {
   return (
     <RequireAuth>
-      <Suspense>
-        <ProfileEditor />
-      </Suspense>
+      <ProfileEditor />
     </RequireAuth>
   );
 }

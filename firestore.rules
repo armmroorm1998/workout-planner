@@ -17,6 +17,15 @@ service cloud.firestore {
       match /logs/{logId} {
         allow read, write: if isUser(uid);
       }
+
+      // Likes: created/deleted only together with a matching +1/-1 on the program's likeCount.
+      match /likes/{programId} {
+        function likes(p) { return p.data.get('likeCount', 0); }
+        function program() { return /databases/$(database)/documents/programs/$(programId); }
+        allow read: if isUser(uid);
+        allow create: if isUser(uid) && likes(getAfter(program())) == likes(get(program())) + 1;
+        allow delete: if isUser(uid) && likes(getAfter(program())) == likes(get(program())) - 1;
+      }
     }
 
     match /programs/{id} {
@@ -25,17 +34,28 @@ service cloud.firestore {
           && d.visibility in ['private', 'public']
           && d.days is list && d.days.size() == 7;
       }
+      function likes(d) { return d.get('likeCount', 0); }
+      function likeDoc() { return /databases/$(database)/documents/users/$(request.auth.uid)/likes/$(id); }
+      // Anyone who can see the program may move likeCount by exactly 1, paired with their own like doc.
+      function likeToggle() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
+          && (resource.data.visibility == 'public' || resource.data.ownerId == request.auth.uid)
+          && ((likes(request.resource.data) == likes(resource.data) + 1 && !exists(likeDoc()) && existsAfter(likeDoc()))
+            || (likes(request.resource.data) == likes(resource.data) - 1 && exists(likeDoc()) && !existsAfter(likeDoc())));
+      }
 
       // Everything requires sign-in; public programs are readable by any signed-in user.
       allow read: if signedIn()
         && (resource.data.visibility == 'public' || resource.data.ownerId == request.auth.uid);
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid
+        && likes(request.resource.data) == 0
         && valid(request.resource.data);
-      allow update: if signedIn()
-        && resource.data.ownerId == request.auth.uid
+      allow update: if signedIn() && (likeToggle() || (
+        resource.data.ownerId == request.auth.uid
         && request.resource.data.ownerId == resource.data.ownerId
-        && valid(request.resource.data);
+        && likes(request.resource.data) == likes(resource.data)
+        && valid(request.resource.data)));
       allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
     }
   }

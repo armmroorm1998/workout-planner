@@ -30,6 +30,7 @@ export interface Program {
   visibility: Visibility;
   days: ProgramDay[]; // length 7, index 0 = Monday
   copiedFrom?: string | null;
+  likeCount?: number;
   createdAt?: number;
   updatedAt?: number;
 }
